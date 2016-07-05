@@ -5,12 +5,13 @@ module.exports = {
    * @param {ServiceLocator} locator
    * @param {Function} locator.register
    */
-  register (locator) {
+  register (locator, formatter) {
     const config = locator.resolve('config');
-    locator.register('logger', Logger, true);
+    const logger = new Logger(locator, formatter);
+
+    locator.registerInstance('logger', logger);
 
     const bus = locator.resolve('eventBus');
-    const logger = locator.resolve('logger');
 
     bus.on('error', (error) => logger.error(error));
   }

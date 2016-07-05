@@ -1,5 +1,4 @@
 const winston = require('winston');
-const formatter = require('winston-console-formatter');
 const LoggerBase = require('./base/LoggerBase');
 
 /**
@@ -9,10 +8,11 @@ const LoggerBase = require('./base/LoggerBase');
  * @class
  */
 class Logger extends LoggerBase {
-  constructor (locator) {
+  constructor (locator, formatter) {
     super();
 
     this._config = locator.resolve('config');
+    this._formatter = formatter;
     this._config.logger = this._config.logger || {};
 
     this._setLevels(this._config.logger.levels);
@@ -54,16 +54,22 @@ class Logger extends LoggerBase {
    * @private
    */
   _initConsoleLogger (userConfig = {}) {
-    const config = formatter.config(userConfig, {
-      colors: {
-        trace: 'blue',
-        debug: 'cyan',
-        info: 'green',
-        warn: 'yellow',
-        error: 'red',
-        fatal: 'magenta'
-      }
-    });
+    let config = userConfig;
+
+    let formatter = this._formatter;
+
+    if (formatter) {
+      config = formatter.config(userConfig, {
+        colors: {
+          trace: 'blue',
+          debug: 'cyan',
+          info: 'green',
+          warn: 'yellow',
+          error: 'red',
+          fatal: 'magenta'
+        }
+      });
+    }
 
     this.addTransport(winston.transports.Console, config);
   }
